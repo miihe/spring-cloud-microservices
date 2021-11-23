@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public class AccountService {
 
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
 
     @Autowired
     public AccountService(AccountRepository accountRepository) {
@@ -25,7 +25,7 @@ public class AccountService {
     }
 
     public Long createAccount(String name, String email, String phone, List<Long> bills) {
-        Account account = new Account(name, email, phone, OffsetDateTime.now(), bills);
+        Account account = new Account(name, email, phone, bills, OffsetDateTime.now());
         return accountRepository.save(account).getAccountId();
     }
 
