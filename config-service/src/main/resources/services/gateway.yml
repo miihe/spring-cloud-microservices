@@ -37,5 +37,10 @@ zuul:
       serviceId: payment-service
       stripPrefix: false
 
+    transfer-service:
+      path: /transfers/**
+      serviceId: transfer-service
+      stripPrefix: false
+
 server:
   port: 8989

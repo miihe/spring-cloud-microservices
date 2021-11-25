@@ -35,7 +35,6 @@ services:
       - config-service
       - registry
 
-
   bill-service:
     restart: on-failure
     container_name: bill-service
@@ -62,6 +61,16 @@ services:
     build: payment-service
     ports:
       - 8888:8888
+    depends_on:
+      - config-service
+      - registry
+
+  transfer-service:
+    restart: on-failure
+    container_name: transfer-service
+    build: transfer-service
+    ports:
+      - 8889:8889
     depends_on:
       - config-service
       - registry

@@ -17,9 +17,9 @@ import java.time.OffsetDateTime;
 @Service
 public class DepositService {
 
-    private static final String TOPIC_EXCHANGE_PAYMENT = "js.payment.notify.exchange";
+    private static final String TOPIC_EXCHANGE_DEPOSIT = "js.deposit.notify.exchange";
 
-    private static final String ROUTING_KEY_PAYMENT = "js.key.payment";
+    private static final String ROUTING_KEY_DEPOSIT = "js.key.deposit";
 
     private DepositRepository depositRepository;
 
@@ -39,8 +39,8 @@ public class DepositService {
     }
 
     public DepositResponseDTO deposit(Long accountId, Long billId, BigDecimal amount) {
-        if (accountId == null && billId == null) {
-            throw new DepositServiceException("Account is null and bill is null");
+        if (accountId == null & billId == null) {
+            throw new DepositServiceException("Account ID and bill ID is null.");
         }
 
         if (billId != null) {
@@ -69,7 +69,7 @@ public class DepositService {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             rabbitTemplate.
-                    convertAndSend(TOPIC_EXCHANGE_PAYMENT, ROUTING_KEY_PAYMENT,
+                    convertAndSend(TOPIC_EXCHANGE_DEPOSIT, ROUTING_KEY_DEPOSIT,
                             objectMapper.writeValueAsString(depositResponseDTO));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
