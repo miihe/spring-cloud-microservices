@@ -49,8 +49,8 @@ public class TransferService {
             BillResponseDTO payeeBillResponseDTO = billServiceClient.getBillById(payeeBillId);
             BillRequestDTO senderBillRequestDTO = createBillRequestSubtract(amount, senderBillResponseDTO);
             BillRequestDTO payeeBillRequestDTO = createBillRequestAdd(amount, payeeBillResponseDTO);
-            billServiceClient.update(senderBillId, senderBillRequestDTO);
-            billServiceClient.update(payeeBillId, payeeBillRequestDTO);
+            billServiceClient.updateAmountOfBill(senderBillId, senderBillRequestDTO.getAmount());
+            billServiceClient.updateAmountOfBill(payeeBillId, payeeBillRequestDTO.getAmount());
             AccountResponseDTO senderAccountResponseDTO = accountServiceClient.getAccountById(senderBillResponseDTO.getAccountId());
             AccountResponseDTO payeeAccountResponseDTO = accountServiceClient.getAccountById(payeeBillResponseDTO.getAccountId());
             transferRepository.save(new Transfer(senderAccountResponseDTO.getName(), senderBillId, amount,
@@ -61,14 +61,12 @@ public class TransferService {
         BillResponseDTO payeeDefaultBill = getDefaultBill(payeeAccountId);
         BillRequestDTO senderBillRequestDTO = createBillRequestSubtract(amount, senderDefaultBill);
         BillRequestDTO payeeBillRequestDTO = createBillRequestAdd(amount, payeeDefaultBill);
-        billServiceClient.update(senderDefaultBill.getBillId(), senderBillRequestDTO);
-        billServiceClient.update(payeeDefaultBill.getBillId(), payeeBillRequestDTO);
+        billServiceClient.updateAmountOfBill(senderDefaultBill.getBillId(), senderBillRequestDTO.getAmount());
+        billServiceClient.updateAmountOfBill(payeeDefaultBill.getBillId(), payeeBillRequestDTO.getAmount());
         AccountResponseDTO senderAccount = accountServiceClient.getAccountById(senderAccountId);
         AccountResponseDTO payeeAccount = accountServiceClient.getAccountById(payeeAccountId);
         transferRepository.save(new Transfer(senderAccount.getName(), senderBillId, amount,
                 payeeAccount.getName(), payeeBillId, OffsetDateTime.now()));
-        TransferResponseDTO transferResponseDTO = new TransferResponseDTO(amount, senderAccount.getName(),
-                payeeAccount.getName(), senderAccount.getEmail(), payeeAccount.getEmail());
         return createResponse(amount, senderAccount, payeeAccount);
     }
 

@@ -17,4 +17,4 @@ eureka:
     server:
       waitTimeInMsWhenSyncEmpty: 0
   server:
-    peer-node-read-timeout-ms: 100000
+    peer-node-read-timeout-ms: 150000

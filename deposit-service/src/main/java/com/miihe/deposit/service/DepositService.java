@@ -47,7 +47,7 @@ public class DepositService {
             BillResponseDTO billResponseDTO = billServiceClient.getBillById(billId);
             BillRequestDTO billRequestDTO = createBillRequest(amount, billResponseDTO);
 
-            billServiceClient.update(billId, billRequestDTO);
+            billServiceClient.updateAmountOfBill(billId, billRequestDTO.getAmount());
 
             AccountResponseDTO accountResponseDTO = accountServiceClient.getAccountById(billResponseDTO.getAccountId());
             depositRepository.save(new Deposit(amount, billId, OffsetDateTime.now(), accountResponseDTO.getEmail()));
@@ -56,10 +56,9 @@ public class DepositService {
         }
         BillResponseDTO defaultBill = getDefaultBill(accountId);
         BillRequestDTO billRequestDTO = createBillRequest(amount, defaultBill);
-        billServiceClient.update(defaultBill.getBillId(), billRequestDTO);
+        billServiceClient.updateAmountOfBill(defaultBill.getBillId(), billRequestDTO.getAmount());
         AccountResponseDTO account = accountServiceClient.getAccountById(accountId);
         depositRepository.save(new Deposit(amount, defaultBill.getBillId(), OffsetDateTime.now(), account.getEmail()));
-        DepositResponseDTO depositResponseDTO = new DepositResponseDTO(amount, account.getEmail());
         return createResponse(amount, account);
     }
 

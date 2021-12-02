@@ -1,11 +1,7 @@
-package com.miihe.account.controller.dto;
+package com.miihe.bill.rest;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.OffsetDateTime;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -16,7 +12,5 @@ public class AccountRequestDTO {
     private String email;
 
     private String phone;
-
-    private OffsetDateTime creationDate;
 
 }

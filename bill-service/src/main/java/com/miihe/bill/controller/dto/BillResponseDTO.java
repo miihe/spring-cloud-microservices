@@ -3,6 +3,7 @@ package com.miihe.bill.controller.dto;
 import com.miihe.bill.entity.Bill;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -10,6 +11,7 @@ import java.time.OffsetDateTime;
 
 @AllArgsConstructor
 @Getter
+@NoArgsConstructor
 public class BillResponseDTO {
 
     private Long billId;
