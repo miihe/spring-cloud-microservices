@@ -1,11 +1,12 @@
 # Spring cloud microservices
 
-This project is realise simple bank system. It's possible create accounts with multiple bills.  
+This project is realise simple bank system. It's possible create accounts with multiple bills. In the project uses 9 microservices (more details below).   
 Three main operations with balance of bills:
 - deposit;
 - payment;
 - transfer.
-In the project uses 9 microservices (more details below). 
+
+
 
 ## Tags
 - Microservices;
