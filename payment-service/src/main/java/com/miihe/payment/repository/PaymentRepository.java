@@ -8,4 +8,6 @@ import java.util.List;
 public interface PaymentRepository extends CrudRepository<Payment, Long> {
 
     List<Payment> findPaymentsByEmail(String email);
+
+    List<Payment> findAllPaymentsByBillId(Long billId);
 }

@@ -8,4 +8,6 @@ import java.util.List;
 public interface DepositRepository extends CrudRepository<Deposit, Long> {
 
     List<Deposit> findDepositsByEmail(String email);
+
+    List<Deposit> findAllDepositsByBillId(Long billId);
 }

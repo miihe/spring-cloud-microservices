@@ -2,11 +2,12 @@ package com.miihe.payment.controller;
 
 import com.miihe.payment.controller.dto.PaymentRequestDTO;
 import com.miihe.payment.controller.dto.PaymentResponseDTO;
+import com.miihe.payment.entity.Payment;
 import com.miihe.payment.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class PaymentController {
@@ -22,5 +23,10 @@ public class PaymentController {
     public PaymentResponseDTO paymentResponseDTO(@RequestBody PaymentRequestDTO paymentRequestDTO) {
         return paymentService.payment(paymentRequestDTO.getAccountId(),
                 paymentRequestDTO.getBillId(), paymentRequestDTO.getAmount());
+    }
+
+    @GetMapping("/payments/{billId}")
+    public List<Payment> getPaymentsByBillId(@PathVariable Long billId) {
+        return paymentService.getPaymentsByBillId(billId);
     }
 }

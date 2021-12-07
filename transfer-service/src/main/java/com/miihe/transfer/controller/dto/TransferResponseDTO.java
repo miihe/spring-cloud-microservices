@@ -22,4 +22,10 @@ public class TransferResponseDTO {
     private String senderEmail;
 
     private String payeeEmail;
+
+    public TransferResponseDTO(BigDecimal amount, String senderName, String payeeName) {
+        this.amount = amount;
+        this.senderName = senderName;
+        this.payeeName = payeeName;
+    }
 }

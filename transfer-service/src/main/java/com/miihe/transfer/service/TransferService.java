@@ -127,4 +127,10 @@ public class TransferService {
                 findAny().orElseThrow(() ->
                 new TransferServiceException("Unable to find default bill for account: " + accountId));
     }
+
+    public Transfer getTransferById(Long transferId) {
+
+        return transferRepository.findById(transferId)
+                .orElseThrow(() -> new TransferServiceException("Unable to find default bill for account: " + transferId));
+    }
 }

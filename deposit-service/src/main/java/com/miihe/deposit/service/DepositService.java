@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DepositService {
@@ -105,5 +108,12 @@ public class DepositService {
                 filter(BillResponseDTO::getIsDefault).
                 findAny().orElseThrow(() ->
                 new DepositServiceException("Unable to find default bill for account: " + accountId));
+    }
+
+    public List<Deposit> getDepositByBillId(Long billId) {
+        if (depositRepository.findAllDepositsByBillId(billId).isEmpty()) {
+            throw new DepositServiceException("Unable to find any deposits to bill with id " + billId);
+        }
+        return depositRepository.findAllDepositsByBillId(billId);
     }
 }
