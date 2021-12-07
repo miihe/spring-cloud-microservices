@@ -7,6 +7,7 @@ import com.miihe.deposit.entity.Deposit;
 import com.miihe.deposit.exception.DepositServiceException;
 import com.miihe.deposit.repository.DepositRepository;
 import com.miihe.deposit.rest.*;
+import feign.FeignException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,11 @@ public class DepositService {
         }
 
         if (billId != null) {
+            try {
+                billServiceClient.getBillById(billId);
+            } catch (FeignException e) {
+                throw new DepositServiceException("Unable to find bill with id: " + billId);
+            }
             BillResponseDTO billResponseDTO = billServiceClient.getBillById(billId);
             BillRequestDTO billRequestDTO = createBillRequest(amount, billResponseDTO);
 
@@ -53,6 +59,12 @@ public class DepositService {
             depositRepository.save(new Deposit(amount, billId, OffsetDateTime.now(), accountResponseDTO.getEmail()));
 
             return createResponse(amount, accountResponseDTO);
+        }
+
+        try {
+            accountServiceClient.getAccountById(accountId);
+        } catch (FeignException e) {
+            throw new DepositServiceException("Unable to find account with id: " + accountId);
         }
         BillResponseDTO defaultBill = getDefaultBill(accountId);
         BillRequestDTO billRequestDTO = createBillRequest(amount, defaultBill);

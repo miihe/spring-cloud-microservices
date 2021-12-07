@@ -2,10 +2,11 @@ package com.miihe.bill.service;
 
 import com.miihe.bill.entity.Bill;
 import com.miihe.bill.exception.AccountIdNotFoundException;
-import com.miihe.bill.exception.BillNotFountException;
+import com.miihe.bill.exception.BillNotFoundException;
 import com.miihe.bill.repository.BillRepository;
 import com.miihe.bill.rest.AccountServiceClient;
 import com.miihe.bill.rest.BillsToAddOrDeleteDTO;
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class BillService {
 
     public Bill getBillById(Long billId) {
         return billRepository.findById(billId).orElseThrow
-                (() -> new BillNotFountException("Unable to find bill with id: " + billId));
+                (() -> new BillNotFoundException("Unable to find bill with id: " + billId));
     }
 
     public Long createDefaultBillFromAccountService(Long accountId, BigDecimal amount, Boolean isDefault, Boolean overdraftEnabled) {
@@ -37,7 +38,9 @@ public class BillService {
     }
 
     public Long createBill(Long accountId, BigDecimal amount, Boolean isDefault, Boolean overdraftEnabled) {
-        if (accountServiceClient.getAccount(accountId) == null) {
+        try{
+            accountServiceClient.getAccount(accountId);
+        } catch (FeignException e) {
             throw new AccountIdNotFoundException("Account with id: " + accountId + " - is not found. Bill was not created.");
         }
 

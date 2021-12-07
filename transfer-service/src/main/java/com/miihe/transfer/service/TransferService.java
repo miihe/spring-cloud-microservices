@@ -7,6 +7,7 @@ import com.miihe.transfer.entity.Transfer;
 import com.miihe.transfer.exception.TransferServiceException;
 import com.miihe.transfer.repository.TransferRepository;
 import com.miihe.transfer.rest.*;
+import feign.FeignException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,12 @@ public class TransferService {
         }
 
         if (senderBillId != null & payeeBillId != null) {
+            try{
+                billServiceClient.getBillById(senderBillId);
+                billServiceClient.getBillById(payeeBillId);
+            } catch (FeignException e) {
+                throw new TransferServiceException("Unable to find bill of sender or/and payee.");
+            }
             BillResponseDTO senderBillResponseDTO = billServiceClient.getBillById(senderBillId);
             BillResponseDTO payeeBillResponseDTO = billServiceClient.getBillById(payeeBillId);
             BillRequestDTO senderBillRequestDTO = createBillRequestSubtract(amount, senderBillResponseDTO);
@@ -57,6 +64,12 @@ public class TransferService {
                     payeeAccountResponseDTO.getName(), payeeBillId, OffsetDateTime.now()));
             return createResponse(amount, senderAccountResponseDTO, payeeAccountResponseDTO);
         }
+        try{
+            accountServiceClient.getAccountById(senderAccountId);
+            accountServiceClient.getAccountById(payeeAccountId);
+        } catch (FeignException e) {
+            throw new TransferServiceException("Unable to find account of sender or/and payee.");
+        }
         BillResponseDTO senderDefaultBill = getDefaultBill(senderAccountId);
         BillResponseDTO payeeDefaultBill = getDefaultBill(payeeAccountId);
         BillRequestDTO senderBillRequestDTO = createBillRequestSubtract(amount, senderDefaultBill);
@@ -65,8 +78,8 @@ public class TransferService {
         billServiceClient.updateAmountOfBill(payeeDefaultBill.getBillId(), payeeBillRequestDTO.getAmount());
         AccountResponseDTO senderAccount = accountServiceClient.getAccountById(senderAccountId);
         AccountResponseDTO payeeAccount = accountServiceClient.getAccountById(payeeAccountId);
-        transferRepository.save(new Transfer(senderAccount.getName(), senderBillId, amount,
-                payeeAccount.getName(), payeeBillId, OffsetDateTime.now()));
+        transferRepository.save(new Transfer(senderAccount.getName(), getDefaultBill(senderAccountId).getBillId(), amount,
+                payeeAccount.getName(), getDefaultBill(payeeAccountId).getBillId(), OffsetDateTime.now()));
         return createResponse(amount, senderAccount, payeeAccount);
     }
 

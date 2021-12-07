@@ -27,7 +27,7 @@ public class AccountService {
         this.billServiceClient = billServiceClient;
     }
 
-    public Account getAccountById(Long accountId) {
+    public Account getAccountById(Long accountId) throws AccountNotFoundException {
         return accountRepository.findById(accountId).
                 orElseThrow(() -> new AccountNotFoundException("Unable to find account with id: " + accountId));
     }
@@ -50,8 +50,8 @@ public class AccountService {
     }
 
     public Long deleteAccount(Long accountId) {
-        Optional<Account> byIdAccount = accountRepository.findById(accountId);
-        List<Long> bills = byIdAccount.get().getBills();
+        Account accountById = getAccountById(accountId);
+        List<Long> bills = accountById.getBills();
         for (Long forDelete : bills) {
             billServiceClient.deleteBillWithAccount(forDelete);
         }

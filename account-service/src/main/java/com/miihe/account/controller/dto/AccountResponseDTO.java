@@ -3,12 +3,16 @@ package com.miihe.account.controller.dto;
 import com.miihe.account.entity.Account;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 @Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class AccountResponseDTO {
 
     private Long accountId;

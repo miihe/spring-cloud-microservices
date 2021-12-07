@@ -94,4 +94,3 @@ services:
     depends_on:
       - config-service
       - registry
-      - account-service

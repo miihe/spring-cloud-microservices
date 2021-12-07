@@ -16,3 +16,8 @@ eureka:
   client:
     service-url:
       defaultZone: http://registry:8761/eureka/
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always

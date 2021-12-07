@@ -7,6 +7,7 @@ import com.miihe.payment.entity.Payment;
 import com.miihe.payment.exception.PaymentServiceException;
 import com.miihe.payment.repository.PaymentRepository;
 import com.miihe.payment.rest.*;
+import feign.FeignException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,11 @@ public class PaymentService {
         }
 
         if (billId != null) {
+            try{
+                billServiceClient.getBillById(billId);
+            } catch (FeignException e) {
+                throw new PaymentServiceException("Unable to find bill with id: " + billId);
+            }
             BillResponseDTO billResponseDTO = billServiceClient.getBillById(billId);
             BillRequestDTO billRequestDTO = createBillRequest(amount, billResponseDTO);
 
@@ -53,6 +59,11 @@ public class PaymentService {
             paymentRepository.save(new Payment(amount, billId, OffsetDateTime.now(), accountResponseDTO.getEmail()));
 
             return createResponse(amount, accountResponseDTO);
+        }
+        try{
+            accountServiceClient.getAccountById(accountId);
+        } catch (FeignException e) {
+            throw new PaymentServiceException("Unable to find account with id: " + accountId);
         }
         BillResponseDTO defaultBill = getDefaultBill(accountId);
         BillRequestDTO billRequestDTO = createBillRequest(amount, defaultBill);
