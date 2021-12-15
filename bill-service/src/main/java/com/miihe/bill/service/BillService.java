@@ -9,6 +9,7 @@ import com.miihe.bill.rest.BillsToAddOrDeleteDTO;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -37,6 +38,7 @@ public class BillService {
         return billRepository.save(bill).getBillId();
     }
 
+    @Transactional
     public Long createBill(Long accountId, BigDecimal amount, Boolean isDefault, Boolean overdraftEnabled) {
         try{
             accountServiceClient.getAccount(accountId);
@@ -56,6 +58,7 @@ public class BillService {
         return billRepository.save(bill);
     }
 
+    @Transactional
     public Bill deleteBill(Long billId) {
         Bill deletedBill = getBillById(billId);
         accountServiceClient.deleteBillFromAccountBillList(deletedBill.getAccountId(), new BillsToAddOrDeleteDTO(billId));

@@ -11,6 +11,7 @@ import feign.FeignException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -40,16 +41,18 @@ public class PaymentService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
+    @Transactional
     public PaymentResponseDTO payment(Long accountId, Long billId, BigDecimal amount) {
         if (accountId == null & billId == null) {
-            throw new PaymentServiceException("Account ID and bill ID is null.");
+            throw new PaymentServiceException("Payment operation is was canceled. Account ID and bill ID is null.");
         }
 
         if (billId != null) {
             try{
                 billServiceClient.getBillById(billId);
             } catch (FeignException e) {
-                throw new PaymentServiceException("Unable to find bill with id: " + billId);
+                throw new PaymentServiceException("Payment operation is was canceled. " +
+                        "Unable to find bill with id: " + billId);
             }
             BillResponseDTO billResponseDTO = billServiceClient.getBillById(billId);
             BillRequestDTO billRequestDTO = createBillRequest(amount, billResponseDTO);
@@ -64,7 +67,8 @@ public class PaymentService {
         try{
             accountServiceClient.getAccountById(accountId);
         } catch (FeignException e) {
-            throw new PaymentServiceException("Unable to find account with id: " + accountId);
+            throw new PaymentServiceException("Payment operation is was canceled. " +
+                    "Unable to find account with id: " + accountId);
         }
         BillResponseDTO defaultBill = getDefaultBill(accountId);
         BillRequestDTO billRequestDTO = createBillRequest(amount, defaultBill);
@@ -104,7 +108,8 @@ public class PaymentService {
                 stream().
                 filter(BillResponseDTO::getIsDefault).
                 findAny().orElseThrow(() ->
-                new PaymentServiceException("Unable to find default bill for account: " + accountId));
+                new PaymentServiceException("Payment operation is was canceled." +
+                        "Unable to find default bill for account: " + accountId));
     }
 
     public List<Payment> getPaymentsByBillId(Long billId) {

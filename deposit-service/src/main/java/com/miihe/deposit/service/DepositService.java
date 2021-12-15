@@ -11,6 +11,7 @@ import feign.FeignException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -42,16 +43,17 @@ public class DepositService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
+    @Transactional
     public DepositResponseDTO deposit(Long accountId, Long billId, BigDecimal amount) {
         if (accountId == null & billId == null) {
-            throw new DepositServiceException("Account ID and bill ID is null.");
+            throw new DepositServiceException("Deposit operation is was canceled. Account ID and bill ID is null.");
         }
 
         if (billId != null) {
             try {
                 billServiceClient.getBillById(billId);
             } catch (FeignException e) {
-                throw new DepositServiceException("Unable to find bill with id: " + billId);
+                throw new DepositServiceException("Deposit operation is was canceled. Unable to find bill with id: " + billId);
             }
             BillResponseDTO billResponseDTO = billServiceClient.getBillById(billId);
             BillRequestDTO billRequestDTO = createBillRequest(amount, billResponseDTO);
@@ -67,7 +69,7 @@ public class DepositService {
         try {
             accountServiceClient.getAccountById(accountId);
         } catch (FeignException e) {
-            throw new DepositServiceException("Unable to find account with id: " + accountId);
+            throw new DepositServiceException("Deposit operation is was canceled. Unable to find account with id: " + accountId);
         }
         BillResponseDTO defaultBill = getDefaultBill(accountId);
         BillRequestDTO billRequestDTO = createBillRequest(amount, defaultBill);
@@ -107,7 +109,8 @@ public class DepositService {
                 stream().
                 filter(BillResponseDTO::getIsDefault).
                 findAny().orElseThrow(() ->
-                new DepositServiceException("Unable to find default bill for account: " + accountId));
+                new DepositServiceException("Deposit operation is was canceled. " +
+                        "Unable to find default bill for account: " + accountId));
     }
 
     public List<Deposit> getDepositByBillId(Long billId) {

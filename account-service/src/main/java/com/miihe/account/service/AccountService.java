@@ -7,12 +7,12 @@ import com.miihe.account.rest.BillRequestDTO;
 import com.miihe.account.rest.BillServiceClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AccountService {
@@ -32,6 +32,7 @@ public class AccountService {
                 orElseThrow(() -> new AccountNotFoundException("Unable to find account with id: " + accountId));
     }
 
+    @Transactional
     public Long createAccount(String name, String email, String phone) {
         List<Long> bills = new ArrayList<>();
         Account account = new Account(name, email, phone, bills, OffsetDateTime.now());
@@ -49,13 +50,14 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
+    @Transactional
     public Long deleteAccount(Long accountId) {
         Account accountById = getAccountById(accountId);
+        accountRepository.deleteById(accountId);
         List<Long> bills = accountById.getBills();
         for (Long forDelete : bills) {
             billServiceClient.deleteBillWithAccount(forDelete);
         }
-        accountRepository.deleteById(accountId);
         return accountId;
     }
 

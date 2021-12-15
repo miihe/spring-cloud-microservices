@@ -11,6 +11,7 @@ import feign.FeignException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -39,10 +40,17 @@ public class TransferService {
         this.rabbitTemplate = rabbitTemplate;
     }
 
+    @Transactional
     public TransferResponseDTO transfer(Long senderAccountId, Long payeeAccountId, Long senderBillId, Long payeeBillId,
                                         BigDecimal amount) {
-        if ((senderAccountId == null & senderBillId == null) && (payeeAccountId == null & payeeBillId == null)) {
-            throw new TransferServiceException("Parameters of sender (payee) are not set (accountId and billId).");
+        if (senderAccountId == null & senderBillId == null) {
+            throw new TransferServiceException("Transfer operation is was canceled." +
+                    "Parameters of sender are not set (accountId and billId).");
+        }
+
+        if(payeeAccountId == null & payeeBillId == null) {
+            throw new TransferServiceException("Transfer operation is was canceled." +
+                    "Parameters of payee are not set (accountId and billId).");
         }
 
         if (senderBillId != null & payeeBillId != null) {
@@ -50,7 +58,8 @@ public class TransferService {
                 billServiceClient.getBillById(senderBillId);
                 billServiceClient.getBillById(payeeBillId);
             } catch (FeignException e) {
-                throw new TransferServiceException("Unable to find bill of sender or/and payee.");
+                throw new TransferServiceException("Transfer operation is was canceled." +
+                        "Unable to find bill of sender or/and payee.");
             }
             BillResponseDTO senderBillResponseDTO = billServiceClient.getBillById(senderBillId);
             BillResponseDTO payeeBillResponseDTO = billServiceClient.getBillById(payeeBillId);
@@ -64,11 +73,16 @@ public class TransferService {
                     payeeAccountResponseDTO.getName(), payeeBillId, OffsetDateTime.now()));
             return createResponse(amount, senderAccountResponseDTO, payeeAccountResponseDTO);
         }
+        return partOfTransferByAccountId(senderAccountId, payeeAccountId, amount);
+    }
+
+    private TransferResponseDTO partOfTransferByAccountId (Long senderAccountId, Long payeeAccountId, BigDecimal amount) {
         try{
             accountServiceClient.getAccountById(senderAccountId);
             accountServiceClient.getAccountById(payeeAccountId);
         } catch (FeignException e) {
-            throw new TransferServiceException("Unable to find account of sender or/and payee.");
+            throw new TransferServiceException("Transfer operation is was canceled." +
+                    "Unable to find account of sender or/and payee.");
         }
         BillResponseDTO senderDefaultBill = getDefaultBill(senderAccountId);
         BillResponseDTO payeeDefaultBill = getDefaultBill(payeeAccountId);
@@ -125,7 +139,8 @@ public class TransferService {
                 stream().
                 filter(BillResponseDTO::getIsDefault).
                 findAny().orElseThrow(() ->
-                new TransferServiceException("Unable to find default bill for account: " + accountId));
+                new TransferServiceException("Transfer operation is was canceled." +
+                        "Unable to find default bill for account: " + accountId));
     }
 
     public Transfer getTransferById(Long transferId) {
